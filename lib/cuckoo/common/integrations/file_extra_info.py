@@ -308,7 +308,6 @@ def _extracted_files_metadata(
     folder: str,
     destination_folder: str,
     files: List[str],
-    duplicated: Optional[DuplicatesType] = None,
     results: Optional[dict] = None,
 ) -> List[dict]:
     """
@@ -332,11 +331,6 @@ def _extracted_files_metadata(
                 continue
 
             file = File(full_path)
-            sha256 = file.get_sha256()
-            if sha256 in duplicated["sha256"]:
-                continue
-
-            duplicated["sha256"].add(sha256)
             file_info, pefile_object = file.get_all()
             if pefile_object:
                 results.setdefault("pefiles", {}).setdefault(file_info["sha256"], pefile_object)
@@ -501,9 +495,7 @@ def generic_file_extractors(
             if old_tool_name:
                 log.debug("Files already extracted from %s by %s. Also extracted with %s", file, old_tool_name, new_tool_name)
                 continue
-            metadata = _extracted_files_metadata(
-                tempdir, destination_folder, files=extracted_files, duplicated=duplicated, results=results
-            )
+            metadata = _extracted_files_metadata(tempdir, destination_folder, files=extracted_files, results=results)
             data_dictionary.update(
                 {
                     "extracted_files": metadata,
